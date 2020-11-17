@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -27,6 +28,7 @@ import io.swagger.annotations.ApiResponses;
 import io.swagger.annotations.ApiResponse;
 
 @RestController
+@RequestMapping("/v2")
 @Api(value="users", description="Operations pertaining to users")
 public class UserControllerV2 {
    
@@ -34,15 +36,11 @@ public class UserControllerV2 {
     UserRepository userRepository;
 
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "Successfully retrieved users data"),
-        @ApiResponse(code = 401, message = "You are not authorized to view the user data")
+        @ApiResponse(code = 400, message = "Bad request - please include a valid state")
     })
     @ApiOperation(value = "Get all users", response = UserV2.class, responseContainer = "List")
     @GetMapping("/users")
-    public ResponseEntity<List<UserV2>> getUsers(@RequestParam (value = "state", required=false) String state) {
-
-        UserV2 user = new UserV2("a", "b", "c");
-        userRepository.save(user);
+    public ResponseEntity<List<UserV2>> getUsers(@RequestParam (value = "state", required=true) String state) {
 
         // localhost:8080/users?state=Ohio
         // state=Ohio is a request parameter
@@ -53,14 +51,14 @@ public class UserControllerV2 {
             List<UserV2> filteredUserList = userRepository.findByState(state);
             return new ResponseEntity<List<UserV2>>(filteredUserList, HttpStatus.OK);
         } else {
-            Iterable<UserV2> userIterable = userRepository.findAll();
+            // Iterable<UserV2> userIterable = userRepository.findAll();
             
-            List<UserV2> userList = (List<UserV2>) userIterable;
+            // List<UserV2> userList = (List<UserV2>) userIterable;
 
-            // int myInt = 8;
-            // double myDub = (double) myInt;
+            // // int myInt = 8;
+            // // double myDub = (double) myInt;
 
-            return new ResponseEntity<List<UserV2>>(userList, HttpStatus.OK);
+            return new ResponseEntity<List<UserV2>>(HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -95,6 +93,8 @@ public class UserControllerV2 {
         if (bindingResult.hasErrors()) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
+
+        System.out.println(user);
 
         userRepository.save(user);
             return new ResponseEntity<>(HttpStatus.CREATED);
@@ -132,5 +132,4 @@ public class UserControllerV2 {
         userRepository.deleteById(id);
         return new ResponseEntity<>(HttpStatus.OK);
     }
-
 }

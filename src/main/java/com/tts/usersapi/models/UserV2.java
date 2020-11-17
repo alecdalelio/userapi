@@ -22,7 +22,7 @@ public class UserV2 {
     @ApiModelProperty(notes = "User's first name")
     private String firstName;
 
-    @Length(max=2)
+    @Length(min=2)
     @ApiModelProperty(notes = "User's last name")
     private String lastName;
     
